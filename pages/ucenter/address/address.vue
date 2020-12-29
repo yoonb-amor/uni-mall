@@ -4,7 +4,7 @@
 			<view class="item" v-for="(item, index) in addressList" :key="item.id" @tap="addressAddOrUpdate" :data-address-id="item.id">
 				<view class="l">
 					<view class="name">{{item.userName||''}}</view>
-					<view class="default" v-if="item.is_default">默认</view>
+					<view class="default" v-if="item.isDefault">默认</view>
 				</view>
 				<view class="c">
 					<view class="mobile">{{item.telNumber}}</view>

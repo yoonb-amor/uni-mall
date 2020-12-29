@@ -14,7 +14,7 @@
 				<input class="input" v-model="address.detailInfo" placeholder="详细地址, 如街道、楼盘号等" />
 			</view>
 			<view class="form-default">
-				<text @tap="bindIsDefault" :class="'default-input '+(address.is_default == 1 ? 'selected' : '')">设为默认地址</text>
+				<text @tap="bindIsDefault" :class="'default-input '+(address.isDefault == 1 ? 'selected' : '')">设为默认地址</text>
 			</view>
 		</view>
 
@@ -50,14 +50,15 @@
 			return {
 				address: {
 					id: 0,
-					province_id: 0,
-					city_id: 0,
-					district_id: 0,
+					provinceId: 0,
+					cityId: 0,
+					countyId: 0,
+          townId : 0,
 					address: '',
 					full_region: '',
 					userName: '',
 					telNumber: '',
-					is_default: 0
+					isDefault: 0
 				},
 				addressId: 0,
 				openSelectRegion: false,
@@ -88,7 +89,7 @@
 		methods: {
 			bindIsDefault() {
 				let address = this.address;
-				address.is_default = !address.is_default;
+				address.isDefault = !address.isDefault;
 				this.address = address;
 			},
 			getAddressDetail() {
@@ -106,7 +107,7 @@
 			setRegionDoneStatus() {
 				let that = this;
 				let doneStatus = that.selectRegionList.every(item => {
-					return item.id != 0;
+					return item.id !== 0;
 				});
 
 				that.selectRegionDone = doneStatus
@@ -118,24 +119,29 @@
 
 				//设置区域选择数据
 				let address = that.address;
-				if (address.province_id > 0 && address.city_id > 0 && address.district_id > 0) {
+				if (address.provinceId > 0 && address.cityId > 0 && address.countyId > 0) {
 					let selectRegionList = that.selectRegionList;
-					selectRegionList[0].id = address.province_id;
-					selectRegionList[0].name = address.province_name;
+					selectRegionList[0].id = address.provinceId;
+					selectRegionList[0].name = address.provinceName;
 					selectRegionList[0].parent_id = 1;
 
-					selectRegionList[1].id = address.city_id;
-					selectRegionList[1].name = address.city_name;
-					selectRegionList[1].parent_id = address.province_id;
+					selectRegionList[1].id = address.cityId;
+					selectRegionList[1].name = address.cityName;
+					selectRegionList[1].parent_id = address.provinceId;
 
-					selectRegionList[2].id = address.district_id;
-					selectRegionList[2].name = address.district_name;
-					selectRegionList[2].parent_id = address.city_id;
+					selectRegionList[2].id = address.countyId;
+					selectRegionList[2].name = address.countyName;
+					selectRegionList[2].parent_id = address.cityId;
+          if(selectRegionList[3]){
+            selectRegionList[3].id = address.townId;
+            selectRegionList[3].name = address.townName;
+            selectRegionList[3].parent_id = address.countyId;
+          }
 
 					that.selectRegionList = selectRegionList
 					that.regionType = 3
 
-					that.getRegionList(address.city_id);
+					that.getRegionList(address.cityId);
 				} else {
 					that.selectRegionList = [{
 						id: 0,
@@ -154,7 +160,7 @@
 						type: 3
 					}]
 					that.regionType = 1
-					that.getRegionList(1);
+					that.getRegionList(0);
 				}
 
 				that.setRegionDoneStatus();
@@ -190,7 +196,7 @@
 
 
 				that.selectRegionList = selectRegionList
-				if (regionType != 3) {
+				if (regionType != 4) {
 					that.regionType = regionType + 1
 					that.getRegionList(regionItem.id);
 				}
@@ -229,12 +235,17 @@
 
 				let address = this.address;
 				let selectRegionList = this.selectRegionList;
-				address.province_id = selectRegionList[0].id;
-				address.city_id = selectRegionList[1].id;
-				address.district_id = selectRegionList[2].id;
-				address.province_name = selectRegionList[0].name;
-				address.city_name = selectRegionList[1].name;
-				address.district_name = selectRegionList[2].name;
+				address.provinceId = selectRegionList[0].id;
+				address.cityId = selectRegionList[1].id;
+				address.countyId = selectRegionList[2].id;
+				address.provinceName = selectRegionList[0].name;
+        address.cityName = selectRegionList[1].name;
+        address.countyName = selectRegionList[2].name;
+        if(selectRegionList[3]){
+
+          address.townId = selectRegionList[3].id;
+          address.townName = selectRegionList[3].name;
+        }
 				address.full_region = selectRegionList.map(item => {
 					return item.name;
 				}).join('');
@@ -255,16 +266,32 @@
 					parentId: regionId
 				}).then(function(res) {
 					if (res.errno === 0) {
-						that.regionList = res.data.map(item => {
-							//标记已选择的
-							if (regionType == item.type && that.selectRegionList[regionType - 1].id == item.id) {
-								item.selected = true;
-							} else {
-								item.selected = false;
-							}
+					  if(res.data.length>0){
+              that.regionList = res.data.map(item => {
+                //标记已选择的
+                if (regionType == item.type && that.selectRegionList[regionType - 1].id == item.id) {
+                  item.selected = true;
+                } else {
+                  item.selected = false;
+                }
+                if(that.selectRegionList.length==3&&that.regionType==3){
+                  that.selectRegionDone = false;
+                  that.selectRegionList.push({
+                    id: 0,
+                    name: '镇',
+                    parent_id: 1,
+                    type: 4
+                  });
+                }
+                return item;
+              })
+            }else{
+              that.selectRegionDone = true
+              if(that.selectRegionList.length==4){
+                that.selectRegionList.splice(3,1);
+              }
+            }
 
-							return item;
-						})
 					}
 				});
 			},
@@ -288,7 +315,7 @@
 				}
 
 
-				if (address.district_id == 0) {
+				if (address.countyId == 0) {
 					util.toast('请输入省市区');
 					return false;
 				}
@@ -304,13 +331,15 @@
 					id: address.id,
 					userName: address.userName,
 					telNumber: address.telNumber,
-					province_id: address.province_id,
-					city_id: address.city_id,
-					district_id: address.district_id,
-					is_default: address.is_default,
-					provinceName: address.province_name,
-					cityName: address.city_name,
-					countyName: address.district_name,
+					provinceId: address.provinceId,
+					cityId: address.cityId,
+					countyId: address.countyId,
+					townId: address.townId,
+					isDefault: address.isDefault,
+					provinceName: address.provinceName,
+					cityName: address.cityName,
+					countyName: address.countyName,
+					townName: address.townName,
 					detailInfo: address.detailInfo,
 				}, 'POST', 'application/json').then(function(res) {
 					if (res.errno === 0) {
@@ -329,7 +358,7 @@
 				this.getAddressDetail();
 			}
 
-			this.getRegionList(1);
+			this.getRegionList(0);
 
 		}
 	}
