@@ -3,8 +3,8 @@
 		<view class="search">
 			<navigator url="/pages/search/search" class="input">
 				<image class="icon"></image>
-				<text class="txt">商品搜索, 共{{goodsCount}}款好物</text>
-			</navigator>
+				<text class="txt">商品搜索, 共{{}}款好物</text>
+			</navigator>goodsCount
 		</view>
 		<view class="catalog">
 			<scroll-view class="nav" :scroll-y="true">

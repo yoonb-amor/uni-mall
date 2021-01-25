@@ -2,7 +2,6 @@ module.exports = {
 	IndexUrlNewGoods: 'index/newGoods', //新品首发
 	IndexUrlHotGoods: 'index/hotGoods', //热卖商品
 	IndexUrlTopic: 'index/topic', //专题精选
-	IndexUrlBrand: 'index/brand', //品牌制造商
 	IndexUrlCategory: 'index/category', //首页底部的分类及商品列表
 	IndexUrlBanner: 'index/banner', //首页banner
 	IndexUrlChannel: 'index/channel', //banner下的分类
@@ -13,11 +12,13 @@ module.exports = {
 
 	GoodsCount: 'goods/count', //统计商品总数
 	GoodsList: 'goods/list', //获得商品列表
+	GoodCategoryList: 'goods/categoryGoodList', //获得商品列表
 	GoodsCategory: 'goods/category', //获得分类数据
 	GoodsDetail: 'goods/detail', //获得商品的详情
 	GoodsHot: 'goods/hot', //人气推荐
 	GoodsNew: 'goods/new', //新品推荐
 	GoodsRelated: 'goods/related', //商品详情页的关联商品（大家都在看）
+	GoodsSearch: 'goods/search',
 
 	BrandList: 'brand/list', //品牌列表
 	BrandDetail: 'brand/detail', //品牌详情

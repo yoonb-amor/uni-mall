@@ -4,7 +4,7 @@
 			<view v-if="!openAttr">
 				<swiper class="goodsimgs" indicator-dots="true" autoplay="true" interval="3000" duration="1000">
 					<swiper-item v-for="(item, index) in gallery" :key="item.id">
-						<image :src="item.img_url" background-size="cover"></image>
+						<image :src="item.imgUrl" background-size="cover"></image>
 					</swiper-item>
 				</swiper>
 				<view class="service-policy">
@@ -16,7 +16,7 @@
 					<view class="c">
 						<text class="name">{{goods.name||''}}</text>
 						<text class="desc">{{goods.goods_brief||''}}</text>
-						<text class="price">￥{{goods.retail_price||'0'}}</text>
+						<text class="price">￥{{goods.myPrice||'0'}}</text>
 						<view class="brand" v-if="brand.name">
 							<navigator :url="'../brandDetail/brandDetail?id='+ brand.id">
 								<text>{{brand.name}}</text>
@@ -103,22 +103,23 @@
 				</view>
 			</view>
 
-			<view v-if="openAttr" class="attr-pop">
+<!--			<view v-if="openAttr" class="attr-pop">-->
+			<view  class="attr-pop">
 				<view class="img-info">
-					<image class="img" :src="goods.list_pic_url"></image>
+					<image class="img" :src="goods.picUrl"></image>
 					<view class="info">
 						<view class="c">
-							<view class="p">价格：￥{{goods.retail_price}}</view>
+							<view class="p">价格：￥{{goods.myPrice}}</view>
 							<view class="a" v-if="productList.length>0">已选择：{{checkedSpecText}}</view>
 						</view>
 					</view>
 				</view>
 				<view class="spec-con">
-					<view class="spec-item" v-for="(item, index) in specificationList" :key="item.specification_id">
-						<view class="name">{{item.name}}</view>
+					<view class="spec-item" v-for="(item, index) in specificationList" :key="item.dim">
+						<view class="name">{{item.saleName}}</view>
 						<view class="values">
-							<view :class="'value ' + (vitem.checked ? 'selected' : '')" @tap="clickSkuValue" v-for="(vitem, vindex) in item.valueList"
-							 :key="vitem.id" :data-value-id="vitem.id" :data-name-id="vitem.specification_id">{{vitem.value}}</view>
+							<view :class="'value ' + (vitem.checked ? 'selected' : '')" @tap="clickSkuValue" v-for="(vitem, vindex) in item.saleAttrList"
+							 :key="vitem.id" :data-value-id="vitem.id" :data-name-id="vitem.specification_id">{{vitem.saleValue}}</view>
 						</view>
 					</view>
 
@@ -222,6 +223,7 @@
 
 			},
 			clickSkuValue: function(event) {
+			  debugger
 				let that = this;
 				let specNameId = event.currentTarget.dataset.nameId;
 				let specValueId = event.currentTarget.dataset.valueId;
