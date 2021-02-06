@@ -8,7 +8,7 @@
 				<input class="input" v-model="address.telNumber" maxlength="15" type="number" placeholder="手机号码" />
 			</view>
 			<view class="form-item">
-				<input class="input" v-model="address.full_region" disabled="true" @tap="chooseRegion" placeholder="省份、城市、区县" />
+				<input class="input" v-model="address.fullRegion" disabled="true" @tap="chooseRegion" placeholder="省份、城市、区县" />
 			</view>
 			<view class="form-item">
 				<input class="input" v-model="address.detailInfo" placeholder="详细地址, 如街道、楼盘号等" />
@@ -55,7 +55,7 @@
 					countyId: 0,
           townId : 0,
 					address: '',
-					full_region: '',
+          fullRegion: '',
 					userName: '',
 					telNumber: '',
 					isDefault: 0
@@ -246,7 +246,7 @@
           address.townId = selectRegionList[3].id;
           address.townName = selectRegionList[3].name;
         }
-				address.full_region = selectRegionList.map(item => {
+				address.fullRegion = selectRegionList.map(item => {
 					return item.name;
 				}).join('');
 

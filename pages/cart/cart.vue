@@ -22,15 +22,16 @@
 						<view :class="'item ' + (isEditCart ? 'edit' : '')" v-for="(item, index) in cartGoods" :key="item.id">
 							<view :class="'checkbox ' + (item.checked ? 'checked' : '')" @tap="checkedItem" :data-item-index="index"></view>
 							<view class="cart-goods">
-								<image class="img" :src="item.list_pic_url"></image>
+								<image class="img" :src="item.picUrl"></image>
 								<view class="info">
 									<view class="t">
-										<text class="name">{{item.goods_name}}</text>
-										<text class="num">x{{item.number}}</text>
+										<text class="name">{{item.goodsName}}</text>
+<!--										<text class="num">x{{item.number}}</text>-->
 									</view>
-									<view class="attr">{{ isEditCart ? '已选择:' : ''}}{{item.goods_specifition_name_value||''}}</view>
+									<view class="attr">{{ isEditCart ? '已选择:' : ''}}{{item.goodsName||''}}</view>
 									<view class="b">
-										<text class="price">￥{{item.retail_price}}</text>
+										<text class="price">￥{{item.myPrice}}</text>
+                    <text v-if="!isEditCart" class="num">x{{item.number}}</text>
 										<view class="selnum">
 											<view class="cut" @tap="cutNumber" :data-item-index="index">-</view>
 											<input :value="item.number" class="number" :disabled="true" type="number" />
@@ -100,7 +101,7 @@
 
 				if (!that.isEditCart) {
 					util.request(api.CartChecked, {
-						productIds: that.cartGoods[itemIndex].product_id,
+            goodsId: that.cartGoods[itemIndex].goodsId,
 						isChecked: that.cartGoods[itemIndex].checked ? 0 : 1
 					}, "POST", "application/json").then(function(res) {
 						if (res.errno === 0) {
@@ -138,11 +139,11 @@
 				let that = this;
 
 				if (!that.isEditCart) {
-					var productIds = that.cartGoods.map(function(v) {
-						return v.product_id;
+					var goodsId = that.cartGoods.map(function(v) {
+						return v.goodsId;
 					});
 					util.request(api.CartChecked, {
-						productIds: productIds.join(','),
+            goodsId: goodsId.join(','),
 						isChecked: that.isCheckedAll() ? 0 : 1
 					}, "POST", "application/json").then(function(res) {
 						if (res.errno === 0) {
@@ -189,11 +190,9 @@
 					url: "/pages/index/index"
 				});
 			},
-			updateCart: function(productId, goodsId, number, id) {
+			updateCart: function(goodsId, number, id) {
 				let that = this;
-
 				util.request(api.CartUpdate, {
-					productId: productId,
 					goodsId: goodsId,
 					number: number,
 					id: id
@@ -209,7 +208,7 @@
 				let number = (cartItem.number - 1 > 1) ? cartItem.number - 1 : 1;
 				cartItem.number = number;
 				this.cartGoods = this.cartGoods
-				this.updateCart(cartItem.product_id, cartItem.goods_id, number, cartItem.id);
+				this.updateCart( cartItem.goodsId, number, cartItem.id);
 			},
 			addNumber: function(event) {
 				let itemIndex = event.target.dataset.itemIndex;
@@ -217,7 +216,7 @@
 				let number = cartItem.number + 1;
 				cartItem.number = number;
 				this.cartGoods = this.cartGoods
-				this.updateCart(cartItem.product_id, cartItem.goods_id, number, cartItem.id);
+				this.updateCart(cartItem.goodsId, number, cartItem.id);
 
 			},
 			checkoutOrder: function() {
@@ -241,8 +240,7 @@
 			deleteCart: function() {
 				//获取已选择的商品
 				let that = this;
-
-				let productIds = that.cartGoods.filter(function(element, index, array) {
+				let goodIds = that.cartGoods.filter(function(element, index, array) {
 					if (element.checked == true) {
 						return true;
 					} else {
@@ -250,19 +248,19 @@
 					}
 				});
 
-				if (productIds.length <= 0) {
+				if (goodIds.length <= 0) {
 					return false;
 				}
 
-				productIds = productIds.map(function(element, index, array) {
+        goodIds = goodIds.map(function(element, index, array) {
 					if (element.checked == true) {
-						return element.product_id;
+						return element.goodsId;
 					}
 				});
 
 
 				util.request(api.CartDelete, {
-					productIds: productIds.join(',')
+          goodsId: goodIds.join(',')
 				}, 'POST', 'application/json').then(function(res) {
 					if (res.errno === 0) {
 						let cartList = res.data.cartList.map(v => {

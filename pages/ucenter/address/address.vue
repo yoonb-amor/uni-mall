@@ -8,7 +8,7 @@
 				</view>
 				<view class="c">
 					<view class="mobile">{{item.telNumber}}</view>
-					<view class="address">{{item.full_region+item.detailInfo}}</view>
+					<view class="address">{{item.fullRegion+item.detailInfo}}</view>
 				</view>
 				<view class="r">
 					<image @click.stop.prevent="deleteAddress" :data-address-id="item.id" class="del" src="/static/images/del-address.png"></image>

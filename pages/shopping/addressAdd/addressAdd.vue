@@ -8,13 +8,13 @@
 				<input class="input" v-model="address.telNumber" maxlength="15" type="number" placeholder="手机号码" />
 			</view>
 			<view class="form-item">
-				<input class="input" v-model="address.full_region" disabled="true" @tap="chooseRegion" placeholder="省份、城市、区县" />
+				<input class="input" v-model="address.fullRegion" disabled="true" @tap="chooseRegion" placeholder="省份、城市、区县" />
 			</view>
 			<view class="form-item">
 				<input class="input" v-model="address.detailInfo" placeholder="详细地址, 如街道、楼盘号等" />
 			</view>
 			<view class="form-default">
-				<text @tap="bindIsDefault" :class="'default-input '+(address.is_default == 1 ? 'selected' : '')">设为默认地址</text>
+				<text @tap="bindIsDefault" :class="'default-input '+(address.isDefault == 1 ? 'selected' : '')">设为默认地址</text>
 			</view>
 		</view>
 
@@ -54,7 +54,7 @@
 					city_id: 0,
 					district_id: 0,
 					address: '',
-					full_region: '',
+          fullRegion: '',
 					userName: '',
 					telNumber: '',
 					is_default: 0
@@ -154,7 +154,7 @@
 						type: 3
 					}]
 					that.regionType = 1
-					that.getRegionList(1);
+					that.getRegionList(0);
 				}
 
 				that.setRegionDoneStatus();
@@ -235,7 +235,7 @@
 				address.province_name = selectRegionList[0].name;
 				address.city_name = selectRegionList[1].name;
 				address.district_name = selectRegionList[2].name;
-				address.full_region = selectRegionList.map(item => {
+				address.fullRegion = selectRegionList.map(item => {
 					return item.name;
 				}).join('');
 

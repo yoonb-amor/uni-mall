@@ -65,7 +65,7 @@
 				</view>
 
 				<view class="detail">
-					<uParse :content="goods.goods_desc" noData="" />
+          <image class="img" v-for="(item, index) in wxintroduction" :key="index" :src="'https:'+item" mode="widthFix"></image>
 				</view>
 
 				<view class="common-problem">
@@ -86,31 +86,15 @@
 					</view>
 				</view>
 
-				<view class="related-goods" v-if="relatedGoods.length > 0">
-					<view class="h">
-						<view class="line"></view>
-						<text class="title">大家都在看</text>
-					</view>
-					<view class="b">
-						<view class="item" v-for="(item, index) in relatedGoods" :key="item.id">
-							<navigator :url="'/pages/goods/goods?id='+item.id">
-								<image class="img" :src="item.list_pic_url" background-size="cover"></image>
-								<text class="name">{{item.name}}</text>
-								<text class="price">￥{{item.retail_price}}</text>
-							</navigator>
-						</view>
-					</view>
-				</view>
 			</view>
 
-<!--			<view v-if="openAttr" class="attr-pop">-->
-			<view  class="attr-pop">
+      <view v-if="openAttr" class="attr-pop">
 				<view class="img-info">
 					<image class="img" :src="goods.picUrl"></image>
 					<view class="info">
 						<view class="c">
 							<view class="p">价格：￥{{goods.myPrice}}</view>
-							<view class="a" v-if="productList.length>0">已选择：{{checkedSpecText}}</view>
+							<view class="a" v-if="specificationList.length>0">已选择：{{checkedSpecText}}</view>
 						</view>
 					</view>
 				</view>
@@ -119,7 +103,7 @@
 						<view class="name">{{item.saleName}}</view>
 						<view class="values">
 							<view :class="'value ' + (vitem.checked ? 'selected' : '')" @tap="clickSkuValue" v-for="(vitem, vindex) in item.saleAttrList"
-							 :key="vitem.id" :data-value-id="vitem.id" :data-name-id="vitem.specification_id">{{vitem.saleValue}}</view>
+							 :key="vindex" :data-index="vindex" :data-sku-ids="vitem.skuIds" :data-dim="item.dim">{{vitem.saleValue}}</view>
 						</view>
 					</view>
 
@@ -171,7 +155,6 @@
 				comment: [],
 				brand: {},
 				specificationList: [],
-				productList: [],
 				relatedGoods: [],
 				cartGoodsCount: 0,
 				userHasCollect: 0,
@@ -180,7 +163,8 @@
 				openAttr: false,
 				noCollectImage: "/static/images/icon_collect.png",
 				hasCollectImage: "/static/images/icon_collect_checked.png",
-				collectBackImage: "/static/images/icon_collect.png"
+				collectBackImage: "/static/images/icon_collect.png",
+        wxintroduction:[]
 			}
 		},
 		methods: {
@@ -191,13 +175,13 @@
 				}).then(function(res) {
 					if (res.errno === 0) {
 						that.goods = res.data.info
+            that.wxintroduction=JSON.parse(res.data.info.wxintroduction);
 						that.gallery = res.data.gallery
 						that.attribute = res.data.attribute
 						that.issueList = res.data.issue
 						that.comment = res.data.comment
 						that.brand = res.data.brand
 						that.specificationList = res.data.specificationList
-						that.productList = res.data.productList
 						that.userHasCollect = res.data.userHasCollect
 						//设置默认值
 						that.setDefSpecInfo(that.specificationList);
@@ -206,48 +190,35 @@
 						} else {
 							that.collectBackImage = that.noCollectImage
 						}
-						that.getGoodsRelated();
-					}
-				});
-
-			},
-			getGoodsRelated: function() {
-				let that = this;
-				util.request(api.GoodsRelated, {
-					id: that.id
-				}).then(function(res) {
-					if (res.errno === 0) {
-						that.relatedGoods = res.data.goodsList
 					}
 				});
 
 			},
 			clickSkuValue: function(event) {
-			  debugger
+
 				let that = this;
-				let specNameId = event.currentTarget.dataset.nameId;
-				let specValueId = event.currentTarget.dataset.valueId;
-
+				let skuIds = event.currentTarget.dataset.skuIds;
+				let dim = event.currentTarget.dataset.dim;
+				let index = event.currentTarget.dataset.index;
 				//判断是否可以点击
+				for (let i = 0; i < that.specificationList.length; i++) {
+				  if(that.specificationList[i].dim==dim){
+              for(let j=0;j<that.specificationList[i].saleAttrList.length;j++){
+                if(j==index){
+                  if (that.specificationList[i].saleAttrList[j].checked) {
+                    that.specificationList[i].saleAttrList[j].checked = false;
+                  } else {
+                    that.specificationList[i].saleAttrList[j].checked = true;
+                  }
+                  that.id = that.specificationList[i].saleAttrList[j].skuIds[0]
+                  that.getGoodsInfo();
+                }else {
+                  that.specificationList[i].saleAttrList[j].checked = false;
+                }
+              }
+          }
 
-				let _specificationList = this.specificationList;
-				for (let i = 0; i < _specificationList.length; i++) {
-					if (_specificationList[i].specification_id == specNameId) {
-						for (let j = 0; j < _specificationList[i].valueList.length; j++) {
-							if (_specificationList[i].valueList[j].id == specValueId) {
-								//如果已经选中，则反选
-								if (_specificationList[i].valueList[j].checked) {
-									_specificationList[i].valueList[j].checked = false;
-								} else {
-									_specificationList[i].valueList[j].checked = true;
-								}
-							} else {
-								_specificationList[i].valueList[j].checked = false;
-							}
-						}
-					}
 				}
-				this.specificationList = _specificationList;
 				//重新计算spec改变后的信息
 				this.changeSpecInfo();
 
@@ -256,18 +227,20 @@
 
 			//获取选中的规格信息
 			getCheckedSpecValue: function() {
+			  let that=this;
 				let checkedValues = [];
 				let _specificationList = this.specificationList;
 				for (let i = 0; i < _specificationList.length; i++) {
 					let _checkedObj = {
-						nameId: _specificationList[i].specification_id,
-						valueId: 0,
-						valueText: ''
+						dim : _specificationList[i].dim,
+            skuIds: [],
+            saleValue: ''
 					};
-					for (let j = 0; j < _specificationList[i].valueList.length; j++) {
-						if (_specificationList[i].valueList[j].checked) {
-							_checkedObj.valueId = _specificationList[i].valueList[j].id;
-							_checkedObj.valueText = _specificationList[i].valueList[j].value;
+					for (let j = 0; j < _specificationList[i].saleAttrList.length; j++) {
+						if (_specificationList[i].saleAttrList[j].checked) {
+							_checkedObj.skuIds = _specificationList[i].saleAttrList[j].skuIds;
+							_checkedObj.saleValue = _specificationList[i].saleAttrList[j].saleValue;
+
 						}
 					}
 					checkedValues.push(_checkedObj);
@@ -283,14 +256,14 @@
 			//判断规格是否选择完整
 			isCheckedAllSpec: function() {
 				return !this.getCheckedSpecValue().some(function(v) {
-					if (v.valueId == 0) {
+					if (v.skuIds == []) {
 						return true;
 					}
 				});
 			},
 			getCheckedSpecKey: function() {
 				let checkedValue = this.getCheckedSpecValue().map(function(v) {
-					return v.valueId;
+					return v.skuIds;
 				});
 
 				return checkedValue.join('_');
@@ -300,13 +273,13 @@
 
 				//设置选择的信息
 				let checkedValue = checkedNameValue.filter(function(v) {
-					if (v.valueId != 0) {
+					if (v.skuIds != []) {
 						return true;
 					} else {
 						return false;
 					}
 				}).map(function(v) {
-					return v.valueText;
+					return v.saleValue;
 				});
 				if (checkedValue.length > 0) {
 					this.checkedSpecText = checkedValue.join('　');
@@ -315,7 +288,7 @@
 				}
 
 			},
-			getCheckedProductItem: function(key) {
+			/*getCheckedProductItem: function(key) {
 				return this.productList.filter(function(v) {
 					if (v.goods_specification_ids.indexOf(key) > -1) {
 						return true;
@@ -323,7 +296,7 @@
 						return false;
 					}
 				});
-			},
+			},*/
 			switchAttrPop: function() {
 				if (this.openAttr == false) {
 					this.openAttr = !this.openAttr
@@ -342,7 +315,7 @@
 				} else {
 					//添加或是取消收藏
 					util.request(api.CollectAddOrDelete, {
-							typeId: 0,
+							type: 0,
 							valueId: that.id
 						}, "POST", "application/json")
 						.then(function(res) {
@@ -380,30 +353,24 @@
 					that.openAttr = !that.openAttr
 					that.collectBackImage = "/static/images/detail_back.png"
 				} else {
-
-					//提示选择完整规格
-					if (!that.isCheckedAllSpec()) {
-						return false;
-					}
-
-					//根据选中的规格，判断是否有对应的sku信息
-					let checkedProduct = that.getCheckedProductItem(that.getCheckedSpecKey());
-					if (!checkedProduct || checkedProduct.length <= 0) {
-						//找不到对应的product信息，提示没有库存
-						return false;
-					}
-
-					//验证库存
-					if (checkedProduct.goods_number < that.number) {
-						//找不到对应的product信息，提示没有库存
-						return false;
-					}
+          //提示选择完整规格
+          if (!that.isCheckedAllSpec()) {
+            uni.showToast({
+              title: '请选择完整规格'
+            });
+            return false;
+          }
+          //根据选中的规格，判断是否有对应的sku信息
+          let checkedProduct = that.getCheckedSpecKey();
+          if (!checkedProduct || checkedProduct.length <= 0) {
+            //找不到对应的product信息，提示没有库存
+            return false;
+          }
 
 					// 直接购买商品
 					util.request(api.BuyAdd, {
 							goodsId: that.goods.id,
 							number: that.number,
-							productId: checkedProduct[0].id
 						}, "POST", 'application/json')
 						.then(function(res) {
 							let _res = res;
@@ -444,23 +411,22 @@
 					}
 
 					//根据选中的规格，判断是否有对应的sku信息
-					let checkedProduct = that.getCheckedProductItem(that.getCheckedSpecKey());
+					let checkedProduct = that.getCheckedSpecKey();
 					if (!checkedProduct || checkedProduct.length <= 0) {
 						//找不到对应的product信息，提示没有库存
 						return false;
 					}
 
 					//验证库存
-					if (checkedProduct.goods_number < that.number) {
+					/*if (checkedProduct.goods_number < that.number) {
 						//找不到对应的product信息，提示没有库存
 						return false;
-					}
+					}*/
 
 					//添加到购物车
 					util.request(api.CartAdd, {
 						goodsId: that.goods.id,
 						number: that.number,
-						productId: checkedProduct[0].id
 					}, 'POST', 'application/json').then(function(res) {
 						let _res = res;
 						if (_res.errno == 0) {

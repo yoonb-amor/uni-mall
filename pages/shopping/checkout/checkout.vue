@@ -4,11 +4,11 @@
 			<view class="address-item" @tap="selectAddress" v-if="checkedAddress.id > 0">
 				<view class="l">
 					<text class="name">{{checkedAddress.userName||''}}</text>
-					<text class="default" v-if="checkedAddress.is_default === 1">默认</text>
+					<text class="default" v-if="checkedAddress.isDefault === 1">默认</text>
 				</view>
 				<view class="m">
 					<text class="mobile">{{checkedAddress.telNumber||''}}</text>
-					<text class="address">{{checkedAddress.full_region+checkedAddress.detailInfo}}</text>
+					<text class="address">{{checkedAddress.fullRegion+checkedAddress.detailInfo}}</text>
 				</view>
 				<view class="r">
 					<image src="/static/images/address_right.png"></image>
@@ -49,7 +49,7 @@
 					<text class="name">运费</text>
 				</view>
 				<view class="r">
-					<text class="txt">￥{{freightPrice||''}}</text>
+					<text class="txt">￥{{freightPrice||'0'}}</text>
 				</view>
 			</view>
 			<view class="order-item no-border">
@@ -57,7 +57,7 @@
 					<text class="name">优惠券</text>
 				</view>
 				<view class="r">
-					<text class="txt">-￥{{couponPrice||''}}</text>
+					<text class="txt">-￥{{couponPrice||'0'}}</text>
 				</view>
 			</view>
 		</view>
@@ -65,15 +65,15 @@
 		<view class="goods-items">
 			<view class="item" v-for="(item, index) in checkedGoodsList" :key="item.id">
 				<view class="img">
-					<image :src="item.list_pic_url"></image>
+					<image :src="item.picUrl"></image>
 				</view>
 				<view class="info">
 					<view class="t">
-						<text class="name">{{item.goods_name||''}}</text>
+						<text class="name">{{item.goodsName||''}}</text>
 						<text class="number">x{{item.number||''}}</text>
 					</view>
-					<view class="m">{{item.goods_specifition_name_value||''}}</view>
-					<view class="b">￥{{item.retail_price||''}}</view>
+					<view class="m">{{item.goodsName||''}}</view>
+					<view class="b">￥{{item.myPrice||''}}</view>
 				</view>
 			</view>
 		</view>
@@ -163,7 +163,7 @@
 				let that = this
 				if (app.globalData.userCoupon == 'USE_COUPON') {
 					that.couponDesc = app.globalData.courseCouponCode.name
-					that.couponId = app.globalData.courseCouponCode.user_coupon_id
+					that.couponId = app.globalData.courseCouponCode.userCouponId
 				} else if (app.globalData.userCoupon == 'NO_USE_COUPON') {
 					that.couponDesc = "不使用优惠券"
 					that.couponId = ''
