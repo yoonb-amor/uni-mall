@@ -1,6 +1,6 @@
 const utils = {
 	// 域名
-	// domain: 'https://fly2you.cn/',
+	// domain: 'https://fly2you.cn/', 
 	domain: 'http://127.0.0.1:9520/',
 	//接口地址
 	interfaceUrl: function() {
