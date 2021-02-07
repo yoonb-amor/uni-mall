@@ -47,7 +47,7 @@
 				</view>
 			</button>
 			<view class="item item-bottom">
-				<navigator url="/pages/ucenter/help/help" class="a">
+				<navigator url="/pages/ucenter/helpInfo/helpInfo" class="a">
 					<text class="icon help"></text>
 					<text class="txt">帮助中心</text>
 				</navigator>
