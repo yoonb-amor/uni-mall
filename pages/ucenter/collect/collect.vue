@@ -50,7 +50,7 @@
 						success: function(res) {
 							if (res.confirm) {
 								util.request(api.CollectAddOrDelete, {
-									typeId: that.typeId,
+									type: that.typeId,
 									valueId: goodsId
 								}, "POST", "application/json").then(function(res) {
 									if (res.errno === 0) {

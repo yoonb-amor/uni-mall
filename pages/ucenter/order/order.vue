@@ -3,21 +3,21 @@
 		<view class="orders" v-if="orderList.length>0">
 			<navigator :url="'../orderDetail/orderDetail?id='+item.id" class="order" v-for="(item, index) in orderList" :key="item.id">
 				<view class="h">
-					<view class="l">订单编号：{{item.order_sn||''}}</view>
-					<view class="r">{{item.order_status_text||''}}</view>
+					<view class="l">订单编号：{{item.orderSn||''}}</view>
+					<view class="r">{{item.orderStatusText||''}}</view>
 				</view>
 				<view class="goods" v-for="(gitem, gindex) in item.goodsList" :key="gitem.id">
 					<view class="img">
-						<image :src="gitem.list_pic_url"></image>
+						<image :src="gitem.picUrl"></image>
 					</view>
 					<view class="info">
-						<text class="name">{{gitem.goods_name||''}}</text>
+						<text class="name">{{gitem.goodsName||''}}</text>
 						<text class="number">共{{gitem.number||0}}件商品</text>
 					</view>
 					<view class="status"></view>
 				</view>
 				<view class="b">
-					<view class="l">实付：￥{{item.actual_price||''}}</view>
+					<view class="l">实付：￥{{item.actualPrice||''}}</view>
 					<view class="r">
 						<button class="btn" :data-order-index="index" @click.stop.prevent="payOrder" v-if="item.handleOption.pay">立即支付</button>
 					</view>
@@ -37,7 +37,8 @@
 				orderList: [],
 				page: 1,
 				size: 10,
-				totalPages: 1
+				totalPages: 1,
+        hasNext:true,
 			}
 		},
 		methods: {
@@ -51,7 +52,11 @@
 					if (res.errno === 0) {
 						that.orderList = that.orderList.concat(res.data.data)
 						that.page = res.data.currentPage + 1
-						that.totalPages = res.data.totalPages
+            if(res.data.totalPages>that.totalPages){
+              that.totalPages = res.data.totalPages;
+            }else {
+              that.hasNext=false;
+            }
 					}
 				});
 			},
@@ -70,9 +75,12 @@
 		 * 页面上拉触底事件的处理函数
 		 */
 		onReachBottom: function() {
-			this.getOrderList()
+		  if(this.hasNext){
+        this.getOrderList()
+      }
 		},
 		onShow: function(options) {
+		  this.orderList=[];
 			this.getOrderList();
 		}
 	}
